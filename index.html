@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Avians Electrical System</title>
+    <title>Avians Electrical System - Master v5.0</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -13,113 +13,105 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; }
         .container { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 1300px; margin: 20px auto; min-height: 85vh; }
         
-        /* Navigation / Header */
+        /* Navigation */
         .nav-bar { background: var(--avians); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
         .back-btn { background: #444; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-bottom: 15px; }
-        .back-btn:hover { background: #000; }
 
-        /* Login Page Styling */
+        /* Login */
         #login-page { height: 100vh; display: flex; justify-content: center; align-items: center; background: #2c3e50; }
-        .login-card { background: white; padding: 40px; border-radius: 12px; width: 350px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .login-card { background: white; padding: 40px; border-radius: 12px; width: 320px; text-align: center; }
 
-        /* Grid Layouts */
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; background: #f9f9f9; padding: 15px; border-radius: 8px; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 13px; }
+        /* Layouts */
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; background: #f0f0f0; padding: 15px; border-radius: 8px; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #333; }
 
         /* Tables */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; font-size: 13px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 13px; }
         th { background: #2c3e50; color: white; }
-        tr:hover { background: #f1f1f1; }
-
-        /* Utility */
+        
         .hidden { display: none !important; }
-        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .btn-green { background: var(--success); color: white; }
         .btn-blue { background: var(--avians); color: white; }
         .btn-red { background: var(--danger); color: white; }
+        .import-area { border: 2px dashed #bbb; padding: 15px; margin-top: 20px; border-radius: 8px; }
     </style>
 </head>
 <body>
 
 <div id="login-page">
     <div class="login-card">
-        <img src="https://media.licdn.com/dms/image/v2/D4D0BAQHmgkbALQCm_Q/company-logo_200_200/company-logo_200_200/0/1726556950503/aviansinnovationstechnology_logo?e=2147483647&v=beta&t=D7kGx8jj-MtJ17ePFdQPe0jPF_YsEfaZBlVK-MXVyDc" width="100">
-        <h2 style="color:var(--avians)">Avians Login</h2>
-        <div style="margin-bottom:15px">
-            <input type="text" id="user" placeholder="Username">
-        </div>
-        <div style="margin-bottom:15px">
-            <input type="password" id="pass" placeholder="Password">
-        </div>
-        <button class="btn btn-blue" style="width:100%" onclick="login()">Sign In</button>
-        <p id="error" style="color:red; font-size:12px; margin-top:10px;"></p>
+        <img src="https://media.licdn.com/dms/image/v2/D4D0BAQHmgkbALQCm_Q/company-logo_200_200/company-logo_200_200/0/1726556950503/aviansinnovationstechnology_logo?e=2147483647&v=beta&t=D7kGx8jj-MtJ17ePFdQPe0jPF_YsEfaZBlVK-MXVyDc" width="80">
+        <h3>Staff Login</h3>
+        <input type="text" id="user" placeholder="Username" style="margin-bottom:10px">
+        <input type="password" id="pass" placeholder="Password" style="margin-bottom:10px">
+        <button class="btn btn-blue" style="width:100%" onclick="login()">Login</button>
     </div>
 </div>
 
 <div id="app-content" class="hidden">
     <div class="nav-bar">
-        <span>AVIANS ELECTRICAL DEPT.</span>
-        <div>
-            <span id="user-display" style="margin-right:15px; font-weight:bold;"></span>
-            <button class="btn-red" onclick="logout()">Logout</button>
-        </div>
+        <span>AVIANS INNOVATIONS</span>
+        <button class="btn-red" style="padding:5px 10px" onclick="logout()">Logout</button>
     </div>
 
     <div class="container">
         <div id="menu-view">
-            <div style="display:flex; gap:20px; justify-content:center; padding-top:100px;">
-                <button class="btn-blue" style="padding:50px; font-size:20px;" onclick="showView('json-view')">⚙️ Manage JSON Data</button>
-                <button class="btn-green" style="padding:50px; font-size:20px;" onclick="showView('bom-view')">📝 Create New BOM</button>
+            <div style="display:flex; gap:20px; justify-content:center; padding-top:80px;">
+                <button class="btn-blue" style="padding:40px" onclick="showView('data-view')">⚙️ DATA MANAGEMENT</button>
+                <button class="btn-green" style="padding:40px" onclick="showView('bom-view')">📝 MAKE BOM</button>
             </div>
         </div>
 
-        <div id="json-view" class="hidden">
-            <button class="back-btn" onclick="showView('menu-view')">← Back to Menu</button>
-            <h2>Data Management (JSON Import)</h2>
+        <div id="data-view" class="hidden">
+            <button class="back-btn" onclick="showView('menu-view')">← Back</button>
+            <h2 id="form-title">Add/Edit Motor Specification</h2>
             
-            <label>Paste JSON Array Here:</label>
-            <textarea id="jsonBox" style="height:150px; margin-bottom:10px;" placeholder='[{"Product":"HSD", "Motor":"MFZ"...}]'></textarea>
-            <button class="btn btn-blue" onclick="importData()">Bulk Import JSON</button>
-            
-            <hr style="margin:30px 0">
-            
-            <h3>Saved Motor Logic</h3>
-            <button class="btn-outline" onclick="toggleTable()" id="toggleBtn">Show All Saved Data</button>
-            
-            <div id="master-table-wrapper" class="hidden">
-                <table id="master-table">
-                    <thead>
-                        <tr><th>Product</th><th>Motor</th><th>Panel</th><th>Wire</th><th>PB</th><th>PC</th><th>Actions</th></tr>
-                    </thead>
+            <div class="form-grid">
+                <input type="hidden" id="edit-id">
+                <div><label>Product</label><input type="text" id="mP"></div>
+                <div><label>Motor</label><input type="text" id="mM"></div>
+                <div><label>Panel</label><input type="text" id="mPan"></div>
+                <div><label>Wire</label><input type="text" id="mW"></div>
+                <div><label>PB</label><input type="text" id="mPB"></div>
+                <div><label>PC</label><input type="text" id="mPC"></div>
+                <div style="display:flex; flex-direction:column; gap:5px; justify-content:flex-end;">
+                    <button id="save-btn" class="btn btn-green" onclick="saveManual()">Save Item</button>
+                    <button id="cancel-btn" class="btn-red hidden" onclick="resetForm()">Cancel</button>
+                </div>
+            </div>
+
+            <div class="import-area">
+                <h4>Bulk JSON Import</h4>
+                <textarea id="jsonBox" placeholder='Paste JSON list here...' style="height:80px;"></textarea>
+                <button class="btn btn-blue" style="margin-top:10px" onclick="importJSON()">Import All from JSON</button>
+            </div>
+
+            <h3>Saved Master List</h3>
+            <button class="btn-blue" style="background:#444" onclick="toggleTable()" id="tBtn">Show Saved Data</button>
+            <div id="table-wrap" class="hidden">
+                <table>
+                    <thead><tr><th>Prod</th><th>Motor</th><th>Panel</th><th>Wire</th><th>PB</th><th>PC</th><th>Actions</th></tr></thead>
                     <tbody id="master-body"></tbody>
                 </table>
             </div>
         </div>
 
         <div id="bom-view" class="hidden">
-            <button class="back-btn" onclick="showView('menu-view')">← Back to Menu</button>
-            <h2>Create Client BOM</h2>
-            
+            <button class="back-btn" onclick="showView('menu-view')">← Back</button>
+            <h2>Create New BOM</h2>
             <div class="form-grid">
-                <div><label>Client Name</label><input type="text" id="client"></div>
-                <div><label>OA Number</label><input type="text" id="oa"></div>
-                <div><label>Quantity</label><input type="number" id="pQty" value="1"></div>
+                <div><label>Client</label><input type="text" id="client"></div>
+                <div><label>OA No</label><input type="text" id="oa"></div>
+                <div><label>Qty</label><input type="number" id="qty" value="1"></div>
+                <div><label>Product</label><select id="sP" onchange="syncM()"></select></div>
+                <div><label>Motor</label><select id="sM"></select></div>
+                <button class="btn btn-green" style="height:40px; margin-top:20px;" onclick="addBOM()">Add to BOM</button>
             </div>
-
-            <div class="form-grid" style="background:#eef2f7">
-                <div><label>Select Product</label><select id="selProd" onchange="filterMotors()"></select></div>
-                <div><label>Select Motor</label><select id="selMot"></select></div>
-                <div style="display:flex; align-items:flex-end;">
-                    <button class="btn btn-green" style="width:100%" onclick="addToBOM()">Add Items to List</button>
-                </div>
-            </div>
-
-            <table id="bom-table">
-                <thead>
-                    <tr><th>Component</th><th>Spec</th><th>Unit Qty</th><th>Total</th><th>Action</th></tr>
-                </thead>
+            <table>
+                <thead><tr><th>Component</th><th>Spec</th><th>Unit</th><th>Total</th><th>Action</th></tr></thead>
                 <tbody id="bom-body"></tbody>
             </table>
         </div>
@@ -127,7 +119,6 @@
 </div>
 
 <script>
-// --- FIREBASE SETUP ---
 const firebaseConfig = {
     apiKey: "AIzaSyDaHooz3HeqEZd592kXteRFFVJa8Bzpvtg",
     authDomain: "avians-bom.firebaseapp.com",
@@ -141,115 +132,119 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 let masterData = []; let currentBOM = [];
 
-// --- NAVIGATION LOGIC ---
-function showView(viewId) {
-    ['menu-view', 'json-view', 'bom-view'].forEach(v => document.getElementById(v).classList.add('hidden'));
-    document.getElementById(viewId).classList.remove('hidden');
+// Navigation
+function showView(id) {
+    ['menu-view', 'data-view', 'bom-view'].forEach(v => document.getElementById(v).classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
 }
 
-// --- LOGIN LOGIC ---
+// Auth
 function login() {
     const u = document.getElementById('user').value;
     const p = document.getElementById('pass').value;
-    
-    db.ref('staff/' + u).once('value', snap => {
-        if(snap.exists() && snap.val().password === p) {
-            sessionStorage.setItem('isLoggedIn', 'true');
-            sessionStorage.setItem('activeUser', u);
-            startApp();
-        } else {
-            document.getElementById('error').innerText = "Invalid Username or Password";
-        }
+    db.ref('staff/'+u).once('value', s => {
+        if(s.exists() && s.val().password === p) { sessionStorage.setItem('auth', '1'); init(); }
+        else alert("Wrong Login");
     });
 }
-
-function startApp() {
-    document.getElementById('login-page').classList.add('hidden');
-    document.getElementById('app-content').classList.remove('hidden');
-    document.getElementById('user-display').innerText = "Welcome, " + sessionStorage.getItem('activeUser');
-    loadMasterData();
-}
-
 function logout() { sessionStorage.clear(); location.reload(); }
 
-// --- DATA MANAGEMENT ---
-function importData() {
-    try {
-        const data = JSON.parse(document.getElementById('jsonBox').value);
-        data.forEach(item => {
-            db.ref('master_list').push({
-                p: item.Product, m: item.Motor, pan: item.Panel, w: item.Wire, pb: item.PB, pc: item.PC
-            });
-        });
-        alert("Imported " + data.length + " items!");
-    } catch(e) { alert("Invalid JSON format!"); }
+// Manual Entry Logic
+function saveManual() {
+    const id = document.getElementById('edit-id').value;
+    const val = {
+        Product: document.getElementById('mP').value,
+        Motor: document.getElementById('mM').value,
+        Panel: document.getElementById('mPan').value,
+        Wire: document.getElementById('mW').value,
+        PB: document.getElementById('mPB').value,
+        PC: document.getElementById('mPC').value
+    };
+    if(id) db.ref('master_list/'+id).update(val).then(() => resetForm());
+    else db.ref('master_list').push(val).then(() => resetForm());
 }
 
-function loadMasterData() {
-    db.ref('master_list').on('value', snap => {
-        masterData = []; let html = ""; let prods = new Set();
-        snap.forEach(child => {
-            const d = child.val(); d.id = child.key;
-            masterData.push(d);
-            prods.add(d.p);
-            html += `<tr><td>${d.p}</td><td>${d.m}</td><td>${d.pan}</td><td>${d.w}</td><td>${d.pb}</td><td>${d.pc}</td>
-                     <td><button class="btn-red" onclick="db.ref('master_list/${d.id}').remove()">Del</button></td></tr>`;
-        });
-        document.getElementById('master-body').innerHTML = html;
-        let opt = "<option>Select Product</option>";
-        prods.forEach(p => opt += `<option value="${p}">${p}</option>`);
-        document.getElementById('selProd').innerHTML = opt;
-    });
+function editItem(key) {
+    const item = masterData.find(x => x.id === key);
+    document.getElementById('edit-id').value = key;
+    document.getElementById('mP').value = item.Product;
+    document.getElementById('mM').value = item.Motor;
+    document.getElementById('mPan').value = item.Panel;
+    document.getElementById('mW').value = item.Wire;
+    document.getElementById('mPB').value = item.PB;
+    document.getElementById('mPC').value = item.PC;
+    document.getElementById('save-btn').innerText = "Update Item";
+    document.getElementById('save-btn').className = "btn btn-blue";
+    document.getElementById('cancel-btn').classList.remove('hidden');
+    window.scrollTo(0,0);
 }
+
+function resetForm() {
+    document.getElementById('edit-id').value = "";
+    ['mP','mM','mPan','mW','mPB','mPC'].forEach(i => document.getElementById(i).value = "");
+    document.getElementById('save-btn').innerText = "Save Item";
+    document.getElementById('save-btn').className = "btn btn-green";
+    document.getElementById('cancel-btn').classList.add('hidden');
+}
+
+// JSON Logic
+function importJSON() {
+    try {
+        const list = JSON.parse(document.getElementById('jsonBox').value);
+        list.forEach(i => db.ref('master_list').push(i));
+        alert("Bulk Import Successful!");
+        document.getElementById('jsonBox').value = "";
+    } catch(e) { alert("Invalid JSON"); }
+}
+
+// Syncing Table & Dropdowns
+db.ref('master_list').on('value', snap => {
+    masterData = []; let h = ""; let prods = new Set();
+    snap.forEach(c => {
+        const d = c.val(); d.id = c.key; masterData.push(d); prods.add(d.Product);
+        h += `<tr><td>${d.Product}</td><td>${d.Motor}</td><td>${d.Panel}</td><td>${d.Wire}</td><td>${d.PB}</td><td>${d.PC}</td>
+              <td><button class="btn-blue" onclick="editItem('${d.id}')">Edit</button> <button class="btn-red" onclick="db.ref('master_list/${d.id}').remove()">X</button></td></tr>`;
+    });
+    document.getElementById('master-body').innerHTML = h;
+    let opt = "<option>Select</option>"; prods.forEach(p => opt += `<option value="${p}">${p}</option>`);
+    document.getElementById('sP').innerHTML = opt;
+});
 
 function toggleTable() {
-    const wrapper = document.getElementById('master-table-wrapper');
-    const btn = document.getElementById('toggleBtn');
-    if(wrapper.classList.contains('hidden')) {
-        wrapper.classList.remove('hidden');
-        btn.innerText = "Hide Saved Data";
-    } else {
-        wrapper.classList.add('hidden');
-        btn.innerText = "Show Saved Data";
-    }
+    const w = document.getElementById('table-wrap');
+    const b = document.getElementById('tBtn');
+    w.classList.toggle('hidden');
+    b.innerText = w.classList.contains('hidden') ? "Show Saved Data" : "Hide Saved Data";
 }
 
-// --- BOM LOGIC ---
-function filterMotors() {
-    const p = document.getElementById('selProd').value;
-    let opt = "<option>Select Motor</option>";
-    masterData.filter(d => d.p === p).forEach(d => opt += `<option value="${d.m}">${d.m}</option>`);
-    document.getElementById('selMot').innerHTML = opt;
+// BOM Logic
+function syncM() {
+    const p = document.getElementById('sP').value;
+    let h = "<option>Select Motor</option>";
+    masterData.filter(d => d.Product === p).forEach(d => h += `<option value="${d.Motor}">${d.Motor}</option>`);
+    document.getElementById('sM').innerHTML = h;
 }
-
-function addToBOM() {
-    const mot = document.getElementById('selMot').value;
-    const match = masterData.find(d => d.m === mot);
-    const q = parseInt(document.getElementById('pQty').value) || 1;
-    
+function addBOM() {
+    const mName = document.getElementById('sM').value;
+    const match = masterData.find(x => x.Motor === mName);
+    const q = parseInt(document.getElementById('qty').value) || 1;
     if(match) {
-        const push = (name, spec, u) => currentBOM.push({ name, spec, u, t: u * q });
-        push("Motor", match.m, 1);
-        push("Control Panel", match.pan, 1);
-        if(match.w !== "0") push("Cabling", match.w, 15);
-        push("Push Button", match.pb, 1);
-        push("Photocell/Sensor", match.pc, 1);
+        const push = (c, s, u) => currentBOM.push({c, s, u, t: u*q});
+        push("Motor", match.Motor, 1);
+        push("Panel", match.Panel, 1);
+        if(match.Wire !== "0") push("Cable", match.Wire, 15);
+        push("Push Button", match.PB, 1);
+        push("Sensor", match.PC, 1);
         renderBOM();
     }
 }
-
 function renderBOM() {
-    let h = "";
-    currentBOM.forEach((i, x) => {
-        h += `<tr><td>${i.name}</td><td>${i.spec}</td><td>${i.u}</td><td>${i.t}</td>
-              <td><button class="btn-red" onclick="currentBOM.splice(${x},1);renderBOM()">X</button></td></tr>`;
-    });
+    let h = ""; currentBOM.forEach((i, x) => h += `<tr><td>${i.c}</td><td>${i.s}</td><td>${i.u}</td><td>${i.t}</td><td><button onclick="currentBOM.splice(${x},1);renderBOM()">X</button></td></tr>`);
     document.getElementById('bom-body').innerHTML = h;
 }
 
-// Auto-login check
-if(sessionStorage.getItem('isLoggedIn') === 'true') startApp();
-
+function init() { document.getElementById('login-page').classList.add('hidden'); document.getElementById('app-content').classList.remove('hidden'); }
+if(sessionStorage.getItem('auth')) init();
 </script>
 </body>
 </html>
