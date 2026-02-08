@@ -3,101 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Avians BOM - Professional Management System</title>
+    <title>Avians Data Management</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <style>
         :root { --avians: #0056b3; --accent: #f1c40f; --bg: #f4f7f6; --success: #27ae60; --danger: #e74c3c; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 10px; }
-        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 1400px; margin: auto; min-height: 90vh; }
-        .header-section { display: flex; align-items: center; justify-content: space-between; border-bottom: 4px solid var(--accent); padding-bottom: 15px; margin-bottom: 25px; }
-        .logo-box img { height: 70px; }
-        .grid-layout { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 13px; }
-        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .btn-blue { background: var(--avians); color: white; }
+        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 1200px; margin: auto; }
+        
+        .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 4px solid var(--accent); padding-bottom: 10px; margin-bottom: 20px; }
+        .header img { height: 60px; }
+
+        /* Input Form */
+        .input-box { background: #eee; padding: 20px; border-radius: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 20px; }
+        input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        label { font-size: 12px; font-weight: bold; color: #555; display: block; margin-bottom: 5px; }
+
+        /* Buttons */
+        button { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .btn-green { background: var(--success); color: white; }
+        .btn-blue { background: var(--avians); color: white; }
         .btn-red { background: var(--danger); color: white; }
-        .hidden { display: none !important; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 13px; }
+        .btn-outline { background: white; border: 2px solid var(--avians); color: var(--avians); margin-bottom: 10px; }
+        
+        /* Table */
+        .table-container { margin-top: 20px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; font-size: 14px; }
         th { background: #2c3e50; color: white; }
-        tr.editing { background: #fff9c4 !important; border: 2px solid var(--accent); }
+        tr:nth-child(even) { background: #f9f9f9; }
+        tr:hover { background: #f1f1f1; }
+
+        .hidden { display: none; }
+        .edit-mode { background: #fff9c4 !important; }
     </style>
 </head>
 <body>
 
-<div id="login-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); display:flex; justify-content:center; align-items:center; z-index:9999;">
-    <div style="background:white; padding:30px; border-radius:12px; text-align:center; width:350px;">
-        <img src="https://media.licdn.com/dms/image/v2/D4D0BAQHmgkbALQCm_Q/company-logo_200_200/company-logo_200_200/0/1726556950503/aviansinnovationstechnology_logo?e=2147483647&v=beta&t=D7kGx8jj-MtJ17ePFdQPe0jPF_YsEfaZBlVK-MXVyDc" width="80">
-        <h2>Avians Staff Login</h2>
-        <input type="text" id="userInput" placeholder="Username">
-        <input type="password" id="passInput" placeholder="Password">
-        <button class="btn-blue" style="width:100%; margin-top:10px;" onclick="handleAuth()">Sign In</button>
-    </div>
-</div>
-
-<div id="main-app" class="container hidden">
-    <div class="header-section">
-        <div class="logo-box"><img src="https://media.licdn.com/dms/image/v2/D4D0BAQHmgkbALQCm_Q/company-logo_200_200/company-logo_200_200/0/1726556950503/aviansinnovationstechnology_logo?e=2147483647&v=beta&t=D7kGx8jj-MtJ17ePFdQPe0jPF_YsEfaZBlVK-MXVyDc"></div>
-        <div style="text-align:center;"><h1>AVIANS BOM MANAGER</h1></div>
-        <button class="btn-red" onclick="sessionStorage.clear(); location.reload();">Logout</button>
+<div class="container">
+    <div class="header">
+        <img src="https://media.licdn.com/dms/image/v2/D4D0BAQHmgkbALQCm_Q/company-logo_200_200/company-logo_200_200/0/1726556950503/aviansinnovationstechnology_logo?e=2147483647&v=beta&t=D7kGx8jj-MtJ17ePFdQPe0jPF_YsEfaZBlVK-MXVyDc">
+        <h2 style="color:var(--avians)">Add & Manage Master Data</h2>
     </div>
 
-    <div id="menu-view" style="text-align:center; padding:50px;">
-        <button class="btn-blue" style="font-size:20px; padding:30px; margin:10px;" onclick="nav('data')">⚙️ Manage Data</button>
-        <button class="btn-green" style="font-size:20px; padding:30px; margin:10px;" onclick="nav('bom')">📝 Make BOM</button>
-    </div>
-
-    <div id="data-view" class="hidden">
-        <button onclick="nav('menu')">← Back</button>
-        <h3 id="form-title">Add New Motor Logic</h3>
-        
-        <input type="hidden" id="edit-id"> <div class="grid-layout" style="background:#f0f0f0; padding:15px; border-radius:8px;">
-            <div><label>Product</label><input type="text" id="mProd"></div>
-            <div><label>Motor</label><input type="text" id="mMot"></div>
-            <div><label>Panel</label><input type="text" id="mPan"></div>
-            <div><label>Wire</label><input type="text" id="mWire"></div>
-            <div><label>PB</label><input type="text" id="mPb"></div>
-            <div><label>PC</label><input type="text" id="mPc"></div>
-            <div>
-                <label>&nbsp;</label>
-                <button id="save-btn" class="btn-green" style="width:100%" onclick="saveData()">Save Item</button>
-                <button id="cancel-btn" class="btn-red hidden" style="width:100%; margin-top:5px;" onclick="clearForm()">Cancel Edit</button>
-            </div>
+    <div class="input-box">
+        <input type="hidden" id="edit-id">
+        <div><label>Product</label><input type="text" id="p" placeholder="e.g. HSD"></div>
+        <div><label>Motor</label><input type="text" id="m" placeholder="e.g. MFZ"></div>
+        <div><label>Panel</label><input type="text" id="pan" placeholder="e.g. CS320"></div>
+        <div><label>Wire</label><input type="text" id="w" placeholder="e.g. 2C x 1.5"></div>
+        <div><label>PB</label><input type="text" id="pb" placeholder="e.g. 3-Way NC"></div>
+        <div><label>PC</label><input type="text" id="pc" placeholder="e.g. Both"></div>
+        <div style="display: flex; flex-direction: column; gap: 5px; justify-content: flex-end;">
+            <button id="main-btn" class="btn-green" onclick="submitData()">Save Data</button>
+            <button id="cancel-btn" class="btn-red hidden" onclick="resetForm()">Cancel</button>
         </div>
+    </div>
 
-        <h3>Bulk Import JSON</h3>
-        <textarea id="jsonInput" placeholder="Paste JSON here..." style="height:60px;"></textarea>
-        <button class="btn-blue" onclick="importJSON()">Import JSON</button>
+    <button class="btn-outline" id="toggle-btn" onclick="toggleTable()">👁️ Show Saved Data</button>
 
+    <div id="table-wrapper" class="table-container hidden">
         <table>
-            <thead><tr><th>Prod</th><th>Motor</th><th>Panel</th><th>Wire</th><th>PB</th><th>PC</th><th>Actions</th></tr></thead>
-            <tbody id="master-table"></tbody>
-        </table>
-    </div>
-
-    <div id="bom-view" class="hidden">
-        <button onclick="nav('menu')">← Back</button>
-        <div class="grid-layout">
-            <div><label>Client</label><input type="text" id="cN"></div>
-            <div><label>OA No</label><input type="text" id="oaN"></div>
-            <div><label>Qty</label><input type="number" id="qty" value="1"></div>
-            <div><label>Select Product</label><select id="sProd" onchange="syncMotors()"></select></div>
-            <div><label>Select Motor</label><select id="sMot"></select></div>
-            <div><label>&nbsp;</label><button class="btn-green" onclick="generateItems()">Add to BOM</button></div>
-        </div>
-        <table id="bom-table">
-            <thead><tr><th>Component</th><th>Spec</th><th>Unit</th><th>Total</th><th>Action</th></tr></thead>
-            <tbody id="bom-body"></tbody>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Motor</th>
+                    <th>Panel</th>
+                    <th>Wire</th>
+                    <th>PB</th>
+                    <th>PC</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="data-body">
+                </tbody>
         </table>
     </div>
 </div>
 
 <script>
-// --- FIREBASE CONFIG ---
+// 1. Firebase Configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDaHooz3HeqEZd592kXteRFFVJa8Bzpvtg",
     authDomain: "avians-bom.firebaseapp.com",
@@ -109,125 +95,121 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-let masterList = []; let currentBOM = [];
 
-// --- AUTH & NAV ---
-function handleAuth() {
-    const u = document.getElementById('userInput').value; const p = document.getElementById('passInput').value;
-    db.ref('staff/'+u).once('value', s => {
-        if(s.exists() && s.val().password === p) { sessionStorage.setItem('isLoggedIn', 'true'); initApp(); }
-        else { alert("Wrong Credentials"); }
-    });
-}
-function nav(view) {
-    document.getElementById('menu-view').classList.add('hidden');
-    document.getElementById('data-view').classList.add('hidden');
-    document.getElementById('bom-view').classList.add('hidden');
-    document.getElementById(view+'-view').classList.remove('hidden');
-}
+let isTableVisible = false;
 
-// --- DATA CRUD (Create, Read, Update, Delete) ---
-function saveData() {
+// 2. Add or Update Data
+function submitData() {
     const id = document.getElementById('edit-id').value;
     const data = {
-        p: document.getElementById('mProd').value, m: document.getElementById('mMot').value,
-        pan: document.getElementById('mPan').value, w: document.getElementById('mWire').value,
-        pb: document.getElementById('mPb').value, pc: document.getElementById('mPc').value
+        Product: document.getElementById('p').value,
+        Motor: document.getElementById('m').value,
+        Panel: document.getElementById('pan').value,
+        Wire: document.getElementById('w').value,
+        PB: document.getElementById('pb').value,
+        PC: document.getElementById('pc').value
     };
 
+    if(!data.Product || !data.Motor) return alert("Please fill Product and Motor fields");
+
     if(id) {
+        // Update existing
         db.ref('master_list/' + id).update(data).then(() => {
-            alert("Updated successfully!");
-            clearForm();
+            alert("Data Updated!");
+            resetForm();
         });
     } else {
-        db.ref('master_list').push(data);
-        clearForm();
+        // Add new
+        db.ref('master_list').push(data).then(() => {
+            alert("Data Saved Successfully!");
+            resetForm();
+        });
     }
 }
 
-function editItem(id) {
-    const item = masterList.find(x => x.id === id);
-    if(item) {
-        document.getElementById('edit-id').value = id;
-        document.getElementById('mProd').value = item.p;
-        document.getElementById('mMot').value = item.m;
-        document.getElementById('mPan').value = item.pan;
-        document.getElementById('mWire').value = item.w;
-        document.getElementById('mPb').value = item.pb;
-        document.getElementById('mPc').value = item.pc;
+// 3. Real-time Listener for Table
+db.ref('master_list').on('value', snapshot => {
+    const tbody = document.getElementById('data-body');
+    tbody.innerHTML = "";
+    
+    snapshot.forEach(child => {
+        const item = child.val();
+        const key = child.key;
         
-        document.getElementById('form-title').innerText = "Update Existing Data";
-        document.getElementById('save-btn').innerText = "Update Now";
-        document.getElementById('save-btn').className = "btn-blue";
+        tbody.innerHTML += `
+            <tr id="row-${key}">
+                <td>${item.Product}</td>
+                <td>${item.Motor}</td>
+                <td>${item.Panel}</td>
+                <td>${item.Wire}</td>
+                <td>${item.PB}</td>
+                <td>${item.PC}</td>
+                <td>
+                    <button class="btn-blue" style="padding:5px 10px; font-size:12px;" onclick="editItem('${key}')">Edit</button>
+                    <button class="btn-red" style="padding:5px 10px; font-size:12px;" onclick="deleteItem('${key}')">Del</button>
+                </td>
+            </tr>
+        `;
+    });
+});
+
+// 4. Edit Function (Loads data into text boxes)
+function editItem(key) {
+    db.ref('master_list/' + key).once('value', snapshot => {
+        const item = snapshot.val();
+        document.getElementById('edit-id').value = key;
+        document.getElementById('p').value = item.Product;
+        document.getElementById('m').value = item.Motor;
+        document.getElementById('pan').value = item.Panel;
+        document.getElementById('w').value = item.Wire;
+        document.getElementById('pb').value = item.PB;
+        document.getElementById('pc').value = item.PC;
+
+        // Change UI to Edit Mode
+        document.getElementById('main-btn').innerText = "Update Item";
+        document.getElementById('main-btn').className = "btn-blue";
         document.getElementById('cancel-btn').classList.remove('hidden');
-        window.scrollTo(0, 0);
+        window.scrollTo(0,0);
+    });
+}
+
+// 5. Delete Function
+function deleteItem(key) {
+    if(confirm("Are you sure you want to delete this motor configuration?")) {
+        db.ref('master_list/' + key).remove();
     }
 }
 
-function clearForm() {
+// 6. Reset Form
+function resetForm() {
     document.getElementById('edit-id').value = "";
-    const fields = ['mProd', 'mMot', 'mPan', 'mWire', 'mPb', 'mPc'];
-    fields.forEach(f => document.getElementById(f).value = "");
-    document.getElementById('form-title').innerText = "Add New Motor Logic";
-    document.getElementById('save-btn').innerText = "Save Item";
-    document.getElementById('save-btn').className = "btn-green";
+    document.getElementById('p').value = "";
+    document.getElementById('m').value = "";
+    document.getElementById('pan').value = "";
+    document.getElementById('w').value = "";
+    document.getElementById('pb').value = "";
+    document.getElementById('pc').value = "";
+    
+    document.getElementById('main-btn').innerText = "Save Data";
+    document.getElementById('main-btn').className = "btn-green";
     document.getElementById('cancel-btn').classList.add('hidden');
 }
 
-db.ref('master_list').on('value', s => {
-    masterList = []; let h = ""; let prods = new Set();
-    s.forEach(c => {
-        const d = c.val(); d.id = c.key; masterList.push(d); prods.add(d.p);
-        h += `<tr><td>${d.p}</td><td>${d.m}</td><td>${d.pan}</td><td>${d.w}</td><td>${d.pb}</td><td>${d.pc}</td>
-              <td>
-                <button class="btn-blue" style="padding:5px" onclick="editItem('${d.id}')">Edit</button>
-                <button class="btn-red" style="padding:5px" onclick="db.ref('master_list/${d.id}').remove()">Del</button>
-              </td></tr>`;
-    });
-    document.getElementById('master-table').innerHTML = h;
-    let opt = "<option>Select</option>"; prods.forEach(p => opt += `<option value="${p}">${p}</option>`);
-    document.getElementById('sProd').innerHTML = opt;
-});
-
-// --- JSON IMPORT ---
-function importJSON() {
-    try {
-        const data = JSON.parse(document.getElementById('jsonInput').value);
-        data.forEach(i => db.ref('master_list').push({p:i.Product, m:i.Motor, pan:i.Panel, w:i.Wire, pb:i.PB, pc:i.PC}));
-        alert("Bulk Import Done!");
-        document.getElementById('jsonInput').value = "";
-    } catch(e) { alert("Invalid JSON"); }
+// 7. Toggle Table Visibility
+function toggleTable() {
+    isTableVisible = !isTableVisible;
+    const wrapper = document.getElementById('table-wrapper');
+    const btn = document.getElementById('toggle-btn');
+    
+    if(isTableVisible) {
+        wrapper.classList.remove('hidden');
+        btn.innerText = "🙈 Hide Saved Data";
+    } else {
+        wrapper.classList.add('hidden');
+        btn.innerText = "👁️ Show Saved Data";
+    }
 }
-
-// --- BOM LOGIC ---
-function syncMotors() {
-    const p = document.getElementById('sProd').value;
-    let h = "<option>Select Motor</option>";
-    masterList.filter(d => d.p === p).forEach(d => h += `<option value="${d.m}">${d.m}</option>`);
-    document.getElementById('sMot').innerHTML = h;
-}
-function generateItems() {
-    const mot = document.getElementById('sMot').value;
-    const match = masterList.find(d => d.m === mot);
-    const q = parseInt(document.getElementById('qty').value) || 1;
-    if(!match) return;
-    const add = (c, s, u) => currentBOM.push({c, s, u, t: u*q});
-    add("Motor", match.m, 1); add("Panel", match.pan, 1);
-    if(match.w !== "0") add("Cable", match.w, 15);
-    add("Push Button", match.pb, 1); add("Sensor", match.pc, 1);
-    renderBOM();
-}
-function renderBOM() {
-    let h = ""; currentBOM.forEach((i, x) => h += `<tr><td>${i.c}</td><td>${i.s}</td><td>${i.u}</td><td>${i.t}</td><td><button onclick="currentBOM.splice(${x},1);renderBOM()">X</button></td></tr>`);
-    document.getElementById('bom-body').innerHTML = h;
-}
-
-function initApp() {
-    document.getElementById('login-overlay').classList.add('hidden');
-    document.getElementById('main-app').classList.remove('hidden');
-}
-if(sessionStorage.getItem('isLoggedIn') === 'true') initApp();
 </script>
+
 </body>
 </html>
