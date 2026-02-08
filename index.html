@@ -149,10 +149,14 @@ function login() {
 }
 function logout() { sessionStorage.clear(); location.reload(); }
 
-// Manual Entry Logic
+// --- IMPROVED DATA PERSISTENCE LOGIC ---
+
+// 1. Manual Entry Save (Fixed to match JSON structure)
 function saveManual() {
     const id = document.getElementById('edit-id').value;
-    const val = {
+    
+    // We use the exact same keys as your JSON: Product, Motor, Panel, etc.
+    const data = {
         Product: document.getElementById('mP').value,
         Motor: document.getElementById('mM').value,
         Panel: document.getElementById('mPan').value,
@@ -160,9 +164,89 @@ function saveManual() {
         PB: document.getElementById('mPB').value,
         PC: document.getElementById('mPC').value
     };
-    if(id) db.ref('master_list/'+id).update(val).then(() => resetForm());
-    else db.ref('master_list').push(val).then(() => resetForm());
+
+    if (!data.Product || !data.Motor) {
+        alert("Product and Motor names are required!");
+        return;
+    }
+
+    if (id) {
+        // Update existing entry
+        db.ref('master_list/' + id).update(data)
+            .then(() => { alert("Updated!"); resetForm(); })
+            .catch(err => console.error("Update Error:", err));
+    } else {
+        // Create new entry
+        db.ref('master_list').push(data)
+            .then(() => { alert("Saved to Database!"); resetForm(); })
+            .catch(err => console.error("Save Error:", err));
+    }
 }
+
+// 2. JSON Bulk Import (Fixed to ensure it saves to Firebase)
+function importJSON() {
+    const jsonInput = document.getElementById('jsonBox').value;
+    try {
+        const list = JSON.parse(jsonInput);
+        if (!Array.isArray(list)) throw new Error("Not a list");
+
+        let count = 0;
+        list.forEach(item => {
+            // This sends each item in your JSON array to the Firebase 'master_list'
+            db.ref('master_list').push({
+                Product: item.Product || "Unknown",
+                Motor: item.Motor || "Unknown",
+                Panel: item.Panel || "None",
+                Wire: item.Wire || "0",
+                PB: item.PB || "None",
+                PC: item.PC || "None"
+            });
+            count++;
+        });
+
+        alert("Successfully imported " + count + " items to the database!");
+        document.getElementById('jsonBox').value = ""; // Clear box
+    } catch (e) {
+        alert("Error: Please ensure your JSON is formatted correctly with [ ] brackets.");
+        console.error("JSON Parse Error:", e);
+    }
+}
+
+// 3. Real-time Table Listener (Fixed to read the Correct Keys)
+db.ref('master_list').on('value', snap => {
+    masterData = []; 
+    let html = ""; 
+    let prods = new Set();
+    
+    snap.forEach(child => {
+        const d = child.val(); 
+        d.id = child.key; // Store the Firebase ID for editing/deleting
+        masterData.push(d);
+        
+        if(d.Product) prods.add(d.Product);
+
+        // Populate the table rows
+        html += `<tr>
+            <td>${d.Product || ''}</td>
+            <td>${d.Motor || ''}</td>
+            <td>${d.Panel || ''}</td>
+            <td>${d.Wire || ''}</td>
+            <td>${d.PB || ''}</td>
+            <td>${d.PC || ''}</td>
+            <td>
+                <button class="btn-blue" onclick="editItem('${d.id}')">Edit</button> 
+                <button class="btn-red" onclick="if(confirm('Delete?')) db.ref('master_list/${d.id}').remove()">X</button>
+            </td>
+        </tr>`;
+    });
+    
+    document.getElementById('master-body').innerHTML = html;
+    
+    // Update BOM Dropdowns
+    let opt = "<option>Select Product</option>"; 
+    prods.forEach(p => opt += `<option value="${p}">${p}</option>`);
+    document.getElementById('sP').innerHTML = opt;
+});
 
 function editItem(key) {
     const item = masterData.find(x => x.id === key);
@@ -187,15 +271,15 @@ function resetForm() {
     document.getElementById('cancel-btn').classList.add('hidden');
 }
 
-// JSON Logic
-function importJSON() {
-    try {
-        const list = JSON.parse(document.getElementById('jsonBox').value);
-        list.forEach(i => db.ref('master_list').push(i));
-        alert("Bulk Import Successful!");
-        document.getElementById('jsonBox').value = "";
-    } catch(e) { alert("Invalid JSON"); }
-}
+// // JSON Logic
+// function importJSON() {
+//     try {
+//         const list = JSON.parse(document.getElementById('jsonBox').value);
+//         list.forEach(i => db.ref('master_list').push(i));
+//         alert("Bulk Import Successful!");
+//         document.getElementById('jsonBox').value = "";
+//     } catch(e) { alert("Invalid JSON"); }
+// }
 
 // Syncing Table & Dropdowns
 db.ref('master_list').on('value', snap => {
