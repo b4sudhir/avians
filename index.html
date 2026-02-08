@@ -1,334 +1,564 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Avians Electrical System - Master v5.0</title>
     
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Avians Electrical BOM</title>
     <style>
-        :root { --avians: #0056b3; --accent: #f1c40f; --bg: #f4f7f6; --success: #27ae60; --danger: #e74c3c; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; }
-        .container { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 1300px; margin: 20px auto; min-height: 85vh; }
         
-        /* Navigation */
-        .nav-bar { background: var(--avians); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .back-btn { background: #444; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-bottom: 15px; }
-
-        /* Login */
-        #login-page { height: 100vh; display: flex; justify-content: center; align-items: center; background: #2c3e50; }
-        .login-card { background: white; padding: 40px; border-radius: 12px; width: 320px; text-align: center; }
-
-        /* Layouts */
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; background: #f0f0f0; padding: 15px; border-radius: 8px; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #333; }
-
-        /* Tables */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 13px; }
-        th { background: #2c3e50; color: white; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f4f7f6; padding: 10px; margin: 0; }
+        .container { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 1350px; margin: auto; }
+   
         
-        .hidden { display: none !important; }
-        .btn { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .btn-green { background: var(--success); color: white; }
-        .btn-blue { background: var(--avians); color: white; }
-        .btn-red { background: var(--danger); color: white; }
-        .import-area { border: 2px dashed #bbb; padding: 15px; margin-top: 20px; border-radius: 8px; }
+        .header-section { display: flex; align-items: center; justify-content: flex-start; border-bottom: 4px solid #f1c40f; padding-bottom: 15px; margin-bottom: 25px; gap: 20px; }
+        .logo-box img { height: 90px; width: auto; }
+        .company-name { font-size: 32px; font-weight: 900; color: #2c3e50; text-transform: uppercase; line-height: 1; }
+        .bom-label { font-size: 18px; font-weight: 600; color: #7f8c8d; margin-top: 5px; text-transform: uppercase; }
+
+        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; background: #f9f9f9; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .input-group { display: flex; flex-direction: column; }
+        label { font-weight: bold; margin-bottom: 5px; font-size: 13px; color: #333; }
+        .required::after { content: " *"; color: #e74c3c; }
+        input, select, textarea { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        
+        .selector-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 20px; }
+        select[size] { height: 160px; font-size: 12px; }
+
+        .options-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; padding-bottom: 20px; border-bottom: 2px solid #2c3e50; }
+        .config-box { background: #eee; padding: 10px; border-radius: 4px; margin-bottom: 10px; min-height: 180px;}
+        .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px; }
+        .row-item { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; font-size: 12px; }
+        
+        
+        .btn-bar { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; margin: 20px 0;}
+        button { flex: 1; padding: 14px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; color: white; transition: 0.3s; }
+        #add-btn { background: #3498db; } #xl-btn { background: #27ae60; } #clear-btn { background: #e74c3c; }
+        .del-btn { background: #e74c3c; padding: 5px 10px; font-size: 11px; border-radius: 3px; }
+
+        .output-area { margin-top: 30px; }
+        .client-header { background: #2c3e50; color: white; padding: 15px; border-radius: 5px 5px 0 0; font-size: 14px; }
+        .client-header1 { background: #f1c40f; color: white; padding: 15px; border-radius: 0 0 0 0; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; background: #fff; margin-bottom: 20px; }
+        th { background: #000; color: #f1c40f; border: 1px solid #333; padding: 10px; text-align: left; }
+        .product-sep { background: #f1c40f; color: #000; font-weight: bold; }
+        td { border: 1px solid #ccc; padding: 8px; font-size: 13px; }
+        @media print {
+                        .input-grid, .selector-grid, .options-row, .btn-bar, .del-btn, label, .required {
+                            display: none !important;
+                        }
+                        body { background: white; padding: 0; }
+                        .container { box-shadow: none; max-width: 100%; border: none; }
+                        th { background: #eee !important; color: #000 !important; }
+                        .product-sep { background: #f8f8f8 !important; }
+                        .output-area { margin-top: 0; }
+                }
+                #print-btn { background: #9b59b6; }
+        
+    /* Responsive Header */
+    .header-section { display: flex; flex-wrap: wrap; align-items: center; border-bottom: 4px solid #f1c40f; padding-bottom: 15px; margin-bottom: 25px; gap: 15px; }
+    .logo-box img { height: 70px; width: auto; }
+    .company-name { font-size: 24px; font-weight: 900; color: #2c3e50; text-transform: uppercase; }
+
+    /* Responsive Grids */
+    .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; background: #f9f9f9; padding: 15px; border-radius: 5px; }
+    .selector-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
+    .options-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding-bottom: 20px; border-bottom: 2px solid #2c3e50; }
+
+    /* Touch Friendly Selects */
+    select[size] { height: 180px; font-size: 14px; }
+    input, select { font-size: 16px; padding: 10px; } /* Prevents iOS zoom on focus */
+
+  
+    /* Mobile Table Scroll */
+    .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { width: 100%; min-width: 600px; }
+
+    /* Mobile Specific Overrides */
+    @media (max-width: 768px) {
+        .selector-grid { grid-template-columns: 1fr 1fr; } /* Show 2 dropdowns per row on mobile */
+        .company-name { font-size: 18px; }
+        button { flex: 1 1 45%; } /* Show buttons side-by-side if possible */
+        #add-btn { flex: 1 1 100%; } /* Make Add button full width */
+         .btn-bar { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; }
+    button { flex: 1 1 100%; padding: 15px; font-size: 16px; border-radius: 6px; }
+    }
+
+    @media print {
+        .input-grid, .selector-grid, .options-row, .btn-bar, .del-btn, label { display: none !important; }
+        .table-container { overflow: visible !important; }
+    }
     </style>
 </head>
 <body>
 
-<div id="login-page">
-    <div class="login-card">
-        <img src="https://media.licdn.com/dms/image/v2/D4D0BAQHmgkbALQCm_Q/company-logo_200_200/company-logo_200_200/0/1726556950503/aviansinnovationstechnology_logo?e=2147483647&v=beta&t=D7kGx8jj-MtJ17ePFdQPe0jPF_YsEfaZBlVK-MXVyDc" width="80">
-        <h3>Staff Login</h3>
-        <input type="text" id="user" placeholder="Username" style="margin-bottom:10px">
-        <input type="password" id="pass" placeholder="Password" style="margin-bottom:10px">
-        <button class="btn btn-blue" style="width:100%" onclick="login()">Login</button>
+<div class="container">
+    <div class="header-section">
+        <div class="logo-box"><img src="https://media.licdn.com/dms/image/v2/D4D0BAQHmgkbALQCm_Q/company-logo_200_200/company-logo_200_200/0/1726556950503/aviansinnovationstechnology_logo?e=2147483647&v=beta&t=D7kGx8jj-MtJ17ePFdQPe0jPF_YsEfaZBlVK-MXVyDc" alt="Avians Logo"></div>
+        <div class="title-box">
+            <div class="company-name">Avians Innovations Technology Pvt Ltd</div>
+            <div class="bom-label">Electrical BOM</div>
+        </div>
     </div>
+    
+    <div class="input-grid">
+        <div class="input-group"><label class="required">Client Name</label><input type="text" id="clientName"></div>
+        <div class="input-group"><label class="required">OA Number</label><input type="text" id="oaNumber"></div>
+        <div class="input-group"><label class="required">SO Number</label><input type="number" id="soNumber"></div>
+        <div class="input-group"><label class="required">Width (m)</label><input type="number" id="width" value="0" step="0.1"></div>
+        <div class="input-group"><label class="required">Height (m)</label><input type="number" id="height" value="0" step="0.1"></div>
+        <div class="input-group"><label class="required">Quantity</label><input type="number" id="mainQty" value="1"></div>
+    </div>
+
+    <div class="selector-grid">
+        <div class="input-group"><label>1. Product</label><select id="LB1" size="10" onchange="syncMotors()"></select></div>
+        <div class="input-group"><label>2. Motor</label><select id="LB2" size="10" onchange="syncDetails()"></select></div>
+        <div class="input-group"><label>3. Panel</label><select id="LB3" size="10"><option value="None" selected = 0>None</option></select></div>
+        <div class="input-group"><label>4. Input Wire</label><select id="LB4" size="10"><option value="None">None</option></select></div>
+        <div class="input-group"><label>5. Extra Push Button</label><select id="LB5" size="10"><option value="None">None</option></select></div>
+        <div class="input-group"><label>6. Photocell Type</label><select id="LB6" size="10" onchange="autoPairPC()"><option value="None">None</option></select></div>
+    </div>
+
+    <div class="options-row">
+        <div>
+            <label>Sensors & Accessories</label>
+            <div class="config-box">
+                <div class="row-item"><span>PC Pairs:</span><select id="pcPair"><option value="0">None</option><option value="1">1 Pair</option><option value="2">2 Pair</option></select></div>
+                <div class="row-item"><span>Radar Model:</span><select id="LB7" onchange="autoPairRadar()"><option value="None">None</option></select></div>
+                <div class="row-item"><span>Radar Pairs:</span><select id="radarPair"><option value="0">None</option><option value="1">1 Pair</option><option value="2">2 Pair</option></select></div>
+                <div class="row-item"><span>Safety Edge:</span><select id="safetyEdge"><option value="None">None</option><option value="Safety Edge - Strip">Safety Edge - Strip</option><option value="Safety Edge - Optical">Safety Edge - Optical</option></select></div>
+                <div class="row-item"><span>Flashing Lamp:</span><select id="flashLamp"><option value="None">None</option><option value="Alarm">With Alarm</option><option value="NoAlarm">No Alarm</option></select></div>
+            </div>
+        </div>
+        <div>
+            <label>Additional Components</label>
+            <div class="config-box checkbox-grid">
+                <label><input type="checkbox" id="chkSmps"> SMPS 24VDC</label>
+                <label><input type="checkbox" id="chkRelay"> 24VDC Relay/Base</label>
+                <label><input type="checkbox" id="chkIntegration"> Integration</label>
+                <label><input type="checkbox" id="chkLimit"> Limit Switch</label>
+                <label><input type="checkbox" id="chkTrafic"> Traffic Light</label>
+                <label><input type="checkbox" id="chkKey"> Key Switch</label>
+                <label><input type="checkbox" id="chkSmoke"> Smoke Det.</label>
+                <label><input type="checkbox" id="chkHeat"> Heat Sensor</label>
+            </div>
+        </div>
+        <div>
+            <label>Manual Entry</label>
+            <div class="config-box">
+                <div class="input-group" style="margin-bottom:8px;"><label>Component Name</label><input type="text" id="manualComp"></div>
+                <div class="input-group" style="margin-bottom:8px;"><label>Specification</label><input type="text" id="manualSpec"></div>
+                <div class="input-group"><label>Quantity per Door</label><input type="number" id="manualQty" value="1" min="1"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="btn-bar">
+    <button id="add-btn" onclick="addToMasterList()">+ ADD TO BOM LIST</button>
+    <button id="xl-btn" onclick="exportToExcel()">EXPORT BOM TO EXCEL</button>
+    <button id="print-btn" onclick="window.print()">PRINT BOM TO PDF</button> 
+    <button id="clear-btn" onclick="resetForm(true)">RESET ALL FIELDS</button>
 </div>
 
-<div id="app-content" class="hidden">
-    <div class="nav-bar">
-        <span>AVIANS INNOVATIONS</span>
-        <button class="btn-red" style="padding:5px 10px" onclick="logout()">Logout</button>
+    <div class="output-area">
+    <div class="client-header" id="clientSummary" style="display:none;"></div>
+    <div class="client-header1" id="clientSummary1" style="display:none;"></div>
+    <div class="table-container"> <table id="masterTable">
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Specification</th>
+                    <th>Qty / Unit</th>
+                    <th>Total Qty</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="masterBody"></tbody>
+        </table>
     </div>
-
-    <div class="container">
-        <div id="menu-view">
-            <div style="display:flex; gap:20px; justify-content:center; padding-top:80px;">
-                <button class="btn-blue" style="padding:40px" onclick="showView('data-view')">⚙️ DATA MANAGEMENT</button>
-                <button class="btn-green" style="padding:40px" onclick="showView('bom-view')">📝 MAKE BOM</button>
-            </div>
-        </div>
-
-        <div id="data-view" class="hidden">
-            <button class="back-btn" onclick="showView('menu-view')">← Back</button>
-            <h2 id="form-title">Add/Edit Motor Specification</h2>
-            
-            <div class="form-grid">
-                <input type="hidden" id="edit-id">
-                <div><label>Product</label><input type="text" id="mP"></div>
-                <div><label>Motor</label><input type="text" id="mM"></div>
-                <div><label>Panel</label><input type="text" id="mPan"></div>
-                <div><label>Wire</label><input type="text" id="mW"></div>
-                <div><label>PB</label><input type="text" id="mPB"></div>
-                <div><label>PC</label><input type="text" id="mPC"></div>
-                <div style="display:flex; flex-direction:column; gap:5px; justify-content:flex-end;">
-                    <button id="save-btn" class="btn btn-green" onclick="saveManual()">Save Item</button>
-                    <button id="cancel-btn" class="btn-red hidden" onclick="resetForm()">Cancel</button>
-                </div>
-            </div>
-
-            <div class="import-area">
-                <h4>Bulk JSON Import</h4>
-                <textarea id="jsonBox" placeholder='Paste JSON list here...' style="height:80px;"></textarea>
-                <button class="btn btn-blue" style="margin-top:10px" onclick="importJSON()">Import All from JSON</button>
-            </div>
-
-            <h3>Saved Master List</h3>
-            <button class="btn-blue" style="background:#444" onclick="toggleTable()" id="tBtn">Show Saved Data</button>
-            <div id="table-wrap" class="hidden">
-                <table>
-                    <thead><tr><th>Prod</th><th>Motor</th><th>Panel</th><th>Wire</th><th>PB</th><th>PC</th><th>Actions</th></tr></thead>
-                    <tbody id="master-body"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="bom-view" class="hidden">
-            <button class="back-btn" onclick="showView('menu-view')">← Back</button>
-            <h2>Create New BOM</h2>
-            <div class="form-grid">
-                <div><label>Client</label><input type="text" id="client"></div>
-                <div><label>OA No</label><input type="text" id="oa"></div>
-                <div><label>Qty</label><input type="number" id="qty" value="1"></div>
-                <div><label>Product</label><select id="sP" onchange="syncM()"></select></div>
-                <div><label>Motor</label><select id="sM"></select></div>
-                <button class="btn btn-green" style="height:40px; margin-top:20px;" onclick="addBOM()">Add to BOM</button>
-            </div>
-            <table>
-                <thead><tr><th>Component</th><th>Spec</th><th>Unit</th><th>Total</th><th>Action</th></tr></thead>
-                <tbody id="bom-body"></tbody>
-            </table>
-        </div>
-    </div>
+</div>
 </div>
 
 <script>
-const firebaseConfig = {
-    apiKey: "AIzaSyDaHooz3HeqEZd592kXteRFFVJa8Bzpvtg",
-    authDomain: "avians-bom.firebaseapp.com",
-    databaseURL: "https://avians-bom-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "avians-bom",
-    storageBucket: "avians-bom.firebasestorage.app",
-    messagingSenderId: "663708836206",
-    appId: "1:663708836206:web:1a2dd647cd8bbfed78a17f"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-let masterData = []; let currentBOM = [];
+const DB = [
+    {Product: "HSD", Motor: "MFZ", Panel: "CS320", Wire: "0", PB: "3way Push button-NC type", PC: "both"},
+    {Product: "HSD", Motor: "TD1.5x0.75KW", Panel: "Smartdrive - 1P", Wire: "0", PB: "3way Push button-NC type", PC: "both"},
+    {Product: "HSD", Motor: "TD2.5x1.5KW", Panel: "Smartdrive - 3P", Wire: "0", PB: "3way Push button-NC type", PC: "both"},
+    {Product: "HSD", Motor: "TD4.5x1.5KW", Panel: "Smartdrive - 3P", Wire: "0", PB: "3way Push button-NC type", PC: "both"},
+    {Product: "HSD", Motor: "TD4.5x2.2KW", Panel: "Smartdrive - 3P", Wire: "0", PB: "3way Push button-NC type", PC: "both"},
+    {Product: "HSD", Motor: "LPHS40S", Panel: "Servo Controller", Wire: "0", PB: "3way Push button-NO type", PC: "both"},
+    {Product: "HSD", Motor: "LPHS75S", Panel: "Servo Controller", Wire: "0", PB: "3way Push button-NO type", PC: "both"},
+    {Product: "HSD", Motor: "LPHS100S", Panel: "Servo Controller", Wire: "0", PB: "3way Push button-NO type", PC: "both"},
+    {Product: "HSD", Motor: "LPHS150S", Panel: "Servo Controller", Wire: "0", PB: "3way Push button-NO type", PC: "both"},
+    {Product: "HSD", Motor: "LPHS180S", Panel: "Servo Controller", Wire: "0", PB: "3way Push button-NO type", PC: "both"},
+    {Product: "SD", Motor: "LPSD60", Panel: "GYK91SY", Wire: "2C x 1.5 sqmm", PB: "3way Push button-NO type", PC: "both"},
+    {Product: "SD", Motor: "LPSD150", Panel: "GYK91SY", Wire: "2C x 1.5 sqmm", PB: "3way Push button-NO type", PC: "both"},
+    {Product: "SWRS", Motor: "YZ600", Panel: "AC210", Wire: "2C x 1.5 sqmm", PB: "3way Push button-NC type", PC: "both"},
+    {Product: "SWRS", Motor: "YZ800", Panel: "AC210", Wire: "3C x 1.5 sqmm", PB: "3way Push button-NC type", PC: "both"},
+    {Product: "SWRS", Motor: "YZ1000", Panel: "AC210", Wire: "3C x 1.5 sqmm", PB: "3way Push button-NC type", PC: "both"},
+    {Product: "SWRS", Motor: "YZ1500", Panel: "Internal", Wire: "0", PB: "3way Push button-NO type", PC: "both"},
+    {Product: "SWRS", Motor: "YZ2000", Panel: "Internal", Wire: "0", PB: "3way Push button-NO type", PC: "both"},
+    {Product: "SWRS", Motor: "YZ2500", Panel: "Internal", Wire: "0", PB: "3way Push button-NO type", PC: "both"},
+    {Product: "SWRS", Motor: "YZ3000", Panel: "Internal", Wire: "0", PB: "3way Push button-NO type", PC: "both"},
+    {Product: "SWRS", Motor: "YZ4000", Panel: "Internal", Wire: "0", PB: "3way Push button-NO type", PC: "both"},
+    {Product: "SWG", Motor: "SWG800-A", Panel: "DCK-23", Wire: "3C x 1.0 sqmm", PB: "3way Push button-NO type", PC: "IR Photocell(RX-TX)"},
+    {Product: "SWG", Motor: "SWG1000-A", Panel: "DCK-23", Wire: "3C x 1.0 sqmm", PB: "3way Push button-NO type", PC: "IR Photocell(RX-TX)"},
+    {Product: "SWG", Motor: "SWG800-L", Panel: "DCK-23", Wire: "3C x 1.0 sqmm", PB: "3way Push button-NO type", PC: "IR Photocell(RX-TX)"},
+    {Product: "SWG", Motor: "SWG1000-L", Panel: "DCK-23", Wire: "3C x 1.0 sqmm", PB: "3way Push button-NO type", PC: "IR Photocell(RX-TX)"},
+    {Product: "SWRS", Motor: "LPDD350", Panel: "GYK92-SY", Wire: "3C x 1.0 sqmm", PB: "3way Push button-NO type", PC: "both"},
+    {Product: "SWRS", Motor: "LPDD500", Panel: "GYK92-SY", Wire: "3C x 1.5 sqmm", PB: "3way Push button-NO type", PC: "both"},
+    {Product: "SWRS", Motor: "LPDD650", Panel: "GYK92-SY", Wire: "3C x 1.5 sqmm", PB: "3way Push button-NO type", PC: "both"},
+    {Product: "SWRS", Motor: "RS400", Panel: "AC210", Wire: "3C x 1.0 sqmm", PB: "3way Push button-NC type", PC: "both"},
+    {Product: "SWRS", Motor: "RS500", Panel: "AC210", Wire: "3C x 1.0 sqmm", PB: "3way Push button-NC type", PC: "both"},
+    {Product: "SWRS", Motor: "RS600", Panel: "AC210", Wire: "3C x 1.5 sqmm", PB: "3way Push button-NC type", PC: "both"},
+    {Product: "SWRS", Motor: "RS1000", Panel: "AC210", Wire: "3C x 1.5 sqmm", PB: "3way Push button-NC type", PC: "both"},
+    {Product: "SWRS", Motor: "RS1500", Panel: "Internal", Wire: "3C x 1.5 sqmm", PB: "3way Push button-NO type", PC: "both"},
+    {Product: "SWRS", Motor: "RS2000", Panel: "Internal", Wire: "3C x 1.5 sqmm", PB: "3way Push button-NO type", PC: "both"},
+    {Product: "FRRS", Motor: "yh400", Panel: "AC210", Wire: "3C x 1.0 sqmm", PB: "3way Push button with SS er", PC: "Reflector"},
+    {Product: "FRRS", Motor: "yh600", Panel: "AC210", Wire: "3C x 1.5 sqmm", PB: "3way Push button with SS er", PC: "Reflector"},
+    {Product: "FRRS", Motor: "yh800", Panel: "AC210", Wire: "3C x 1.5 sqmm", PB: "3way Push button with SS er", PC: "Reflector"},
+    {Product: "FRRS", Motor: "yh1000", Panel: "AC210", Wire: "3C x 1.5 sqmm", PB: "3way Push button with SS er", PC: "Reflector"},
+    {Product: "FRRS", Motor: "YH500A", Panel: "Internal", Wire: "0", PB: "not required", PC: "Anlin Photocell"},
+    {Product: "FRRS", Motor: "YH1000A", Panel: "Internal", Wire: "0", PB: "not required", PC: "Anlin Photocell"},
+    {Product: "FRRS", Motor: "YH1500A", Panel: "Internal", Wire: "0", PB: "not required", PC: "Anlin Photocell"},
+    {Product: "FRRS", Motor: "YH2000A", Panel: "Internal", Wire: "0", PB: "not required", PC: "Anlin Photocell"},
+    {Product: "HSD", Motor: "mfz 5-7-90 (with brake)", Panel: "CS320", Wire: "0", PB: "3way Push button-NC type", PC: "both"},
+    {Product: "HSD", Motor: "mfz 30-13-90 (with brake)", Panel: "CS320", Wire: "0", PB: "3way Push button-NC type", PC: "both"},
+    {Product: "HSD", Motor: "mfz 1-7-90(W/O Brake)", Panel: "CS320", Wire: "0", PB: "3way Push button-NC type", PC: "both"},
+    {Product: "FD", Motor: "mdf-50-75-10(W/O VFD)", Panel: "CS320", Wire: "0", PB: "3way Push button-NC type", PC: "IR Photocell(RX-TX)"},
+    {Product: "SWRS", Motor: "mdf-50-75-10(W/O VFD)", Panel: "CS320", Wire: "0", PB: "3way Push button-NC type", PC: "both"},
+    {Product: "SD", Motor: "mfz 1-7-90", Panel: "CS320", Wire: "0", PB: "3way Push button-NC type", PC: "IR Photocell(RX-TX)"},
+    {Product: "SD", Motor: "mfz 1-4-135", Panel: "CS320", Wire: "0", PB: "3way Push button-NC type", PC: "IR Photocell(RX-TX)"},
+    {Product: "SLG", Motor: "TD2.5x1.5KW", Panel: "SLGY 4000 Card", Wire: "2C x 1.5 sqmm", PB: "3way Push button-NO type", PC: "IR Photocell(RX-TX)"},
+    {Product: "SWRS", Motor: "TD2.5x1.5KW", Panel: "DD2230", Wire: "2C x 1.5 sqmm", PB: "3way Push button-NC type", PC: "both"},
+    {Product: "TSLG", Motor: "SLG600", Panel: "Internal", Wire: "3C x 1.0 sqmm", PB: "3way Push button-NO type", PC: "IR Photocell(RX-TX)"},
+    {Product: "TSLG", Motor: "SLG800", Panel: "Internal", Wire: "3C x 1.0 sqmm", PB: "3way Push button-NO type", PC: "IR Photocell(RX-TX)"},
+    {Product: "TSLG", Motor: "SLG1200", Panel: "Internal", Wire: "3C x 1.0 sqmm", PB: "3way Push button-NO type", PC: "IR Photocell(RX-TX)"},
+    {Product: "TSLG", Motor: "SLG1200-DC", Panel: "SLGY-DC Card", Wire: "3C x 1.5 sqmm", PB: "3way Push button-NO type", PC: "IR Photocell(RX-TX)"},
+    {Product: "TSLG", Motor: "SLG1500", Panel: "Internal", Wire: "3C x 1.5 sqmm", PB: "3way Push button-NO type", PC: "IR Photocell(RX-TX)"},
+    {Product: "TSLG", Motor: "SLG2000", Panel: "Internal", Wire: "3C x 1.5 sqmm", PB: "3way Push button-NO type", PC: "IR Photocell(RX-TX)"},
+    {Product: "TSLG", Motor: "SLG2500", Panel: "Internal", Wire: "3C x 1.5 sqmm", PB: "3way Push button-NO type", PC: "IR Photocell(RX-TX)"},
+    {Product: "TSLG", Motor: "SLG4000", Panel: "SLGY 4000 Card", Wire: "3C x 1.5 sqmm", PB: "3way Push button-NO type", PC: "IR Photocell(RX-TX)"},
+    {Product: "FRHSD", Motor: "Sytco0.75 FRMotor 100-90", Panel: "FR PANEL-Avians", Wire: "3C x 1.5 sqmm", PB: "Fire Rated Push Button- NO", PC: "Reflector Photocell"},
+    {Product: "SLG", Motor: "SLG1200", Panel: "Internal", Wire: "3C x 1.0 sqmm", PB: "3way Push button-NO type", PC: "IR Photocell(RX-TX)"},
+    {Product: "SLG", Motor: "SLG1200-DC", Panel: "SLGY-DC Card", Wire: "3C x 1.0 sqmm", PB: "3way Push button-NO type", PC: "IR Photocell(RX-TX)"},
+    {Product: "SLG", Motor: "SLG1500", Panel: "Internal", Wire: "3C x 1.5 sqmm", PB: "3way Push button-NO type", PC: "IR Photocell(RX-TX)"},
+    {Product: "SLG", Motor: "SLG2000", Panel: "Internal", Wire: "3C x 1.5 sqmm", PB: "3way Push button-NO type", PC: "IR Photocell(RX-TX)"},
+    {Product: "SLG", Motor: "SLG2500", Panel: "Internal", Wire: "3C x 1.5 sqmm", PB: "3way Push button-NO type", PC: "IR Photocell(RX-TX)"},
+    {Product: "SLG", Motor: "SLG4000", Panel: "SLGY 4000 Card", Wire: "3C x 1.5 sqmm", PB: "3way Push button-NO type", PC: "IR Photocell(RX-TX)"},
+    {Product: "HSD", Motor: "Tubular A50-HSD", Panel: "Internal", Wire: "3C x 1.5 sqmm", PB: "3way Push button-NO type", PC: "both"},
+    {Product: "RS", Motor: "Tubular A200-RS", Panel: "Internal", Wire: "3C x 1.5 sqmm", PB: "3way Push button-NO type", PC: "IR Photocell(RX-TX)"},
+    {Product: "FRRS", Motor: "Explosion -600", Panel: "Internal", Wire: "3C x 1.5 sqmm", PB: "3way Push button-NO type", PC: "Reflector"},
+    {Product: "FRRS", Motor: "Explosion -1000", Panel: "Internal", Wire: "3C x 1.5 sqmm", PB: "3way Push button-NO type", PC: "Reflector"},
+    {Product: "HSD", Motor: "LPHS100-90", Panel: "GYK93S", Wire: "2C x 1.5 sqmm", PB: "3way Push button-NO type", PC: "both"},
+    {Product: "HSD", Motor: "LPHS80-90", Panel: "GYK93S", Wire: "2C x 1.5 sqmm", PB: "3way Push button-NO type", PC: "both"},
+    {Product: "DL", Motor: "2 way Powerpack", Panel: "DL-2Way", Wire: "4C x 1.5 sqmm", PB: "not required", PC: "not required"},
+    {Product: "DL", Motor: "4 way Powerpack", Panel: "DL-4Way", Wire: "4C x 1.5 sqmm", PB: "not required", PC: "not required"}
+];
+const RADARS = ["Hercules Radar", "Falcon Radar", "6K Radar", "GD Radar"];
+let itemCounter = 0;
+let lastClient = "BOM";
+let lastOA = "Report";
 
-// Navigation
-function showView(id) {
-    ['menu-view', 'data-view', 'bom-view'].forEach(v => document.getElementById(v).classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
+function init() {
+    const lb1 = document.getElementById('LB1');
+    lb1.innerHTML = "";
+    [...new Set(DB.map(d => d.Product))].forEach(p => lb1.add(new Option(p, p)));
+    const lb7 = document.getElementById('LB7');
+    lb7.innerHTML = '<option value="None">None</option>';
+    RADARS.forEach(r => lb7.add(new Option(r, r)));
+    syncMotors();
+    resetForm(false);
 }
 
-// Auth
-function login() {
-    const u = document.getElementById('user').value;
-    const p = document.getElementById('pass').value;
-    db.ref('staff/'+u).once('value', s => {
-        if(s.exists() && s.val().password === p) { sessionStorage.setItem('auth', '1'); init(); }
-        else alert("Wrong Login");
-    });
+function syncMotors() {
+    const lb2 = document.getElementById('LB2'); lb2.innerHTML = "";
+    DB.filter(d => d.Product === document.getElementById('LB1').value).forEach(d => lb2.add(new Option(d.Motor, d.Motor)));
+    syncDetails();
 }
-function logout() { sessionStorage.clear(); location.reload(); }
 
-// --- IMPROVED DATA PERSISTENCE LOGIC ---
-
-// 1. Manual Entry Save (Fixed to match JSON structure)
-function saveManual() {
-    const id = document.getElementById('edit-id').value;
+// function syncDetails() {
+//     const row = DB.find(d => d.Product === document.getElementById('LB1').value && d.Motor === document.getElementById('LB2').value);
+//     const fill = (id, val) => {
+//         const lb = document.getElementById(id); lb.innerHTML = '<option value="None">None</option>';
+//         if(val === "both") { lb.add(new Option("Reflector", "Reflector")); lb.add(new Option("IR Photocell", "IR Photocell")); }
+//         else if(val && val !== "None") { lb.add(new Option(val, val)); }
+//     };
+//     if(row) { fill('LB3', row.Panel); fill('LB4', row.Wire); fill('LB5', row.PB); fill('LB6', row.PC); }
+// }
+function syncDetails() {
+    const row = DB.find(d => d.Product === document.getElementById('LB1').value && d.Motor === document.getElementById('LB2').value);
     
-    // We use the exact same keys as your JSON: Product, Motor, Panel, etc.
-    const data = {
-        Product: document.getElementById('mP').value,
-        Motor: document.getElementById('mM').value,
-        Panel: document.getElementById('mPan').value,
-        Wire: document.getElementById('mW').value,
-        PB: document.getElementById('mPB').value,
-        PC: document.getElementById('mPC').value
+    const fill = (id, val) => {
+        const lb = document.getElementById(id); 
+        lb.innerHTML = '<option value="None">None</option>'; // Always reset with None at the top
+        
+        if(val === "both") { 
+            lb.add(new Option("Reflector", "Reflector")); 
+            lb.add(new Option("IR Photocell", "IR Photocell")); 
+        }
+        else if(val && val !== "None" && val !== "0" && val !== "not required") { 
+            lb.add(new Option(val, val)); 
+        }
+        
+        // This line ensures that even after options are added, "None" remains highlighted
+        lb.selectedIndex = 0; 
     };
 
-    if (!data.Product || !data.Motor) {
-        alert("Product and Motor names are required!");
-        return;
-    }
-
-    if (id) {
-        // Update existing entry
-        db.ref('master_list/' + id).update(data)
-            .then(() => { alert("Updated!"); resetForm(); })
-            .catch(err => console.error("Update Error:", err));
-    } else {
-        // Create new entry
-        db.ref('master_list').push(data)
-            .then(() => { alert("Saved to Database!"); resetForm(); })
-            .catch(err => console.error("Save Error:", err));
+    if(row) { 
+        fill('LB3', row.Panel); // 3. Panel
+        fill('LB4', row.Wire);  // 4. Wire
+        fill('LB5', row.PB);    // 5. Push Button
+        fill('LB6', row.PC);    // 6. Photocell Type
     }
 }
 
-// 2. JSON Bulk Import (Fixed to ensure it saves to Firebase)
-function importJSON() {
-    const jsonInput = document.getElementById('jsonBox').value;
-    try {
-        const list = JSON.parse(jsonInput);
-        if (!Array.isArray(list)) throw new Error("Not a list");
+function autoPairPC() { document.getElementById('pcPair').value = (document.getElementById('LB6').value !== "None") ? "1" : "0"; }
+function autoPairRadar() { document.getElementById('radarPair').value = (document.getElementById('LB7').value !== "None") ? "1" : "0"; }
 
-        let count = 0;
-        list.forEach(item => {
-            // This sends each item in your JSON array to the Firebase 'master_list'
-            db.ref('master_list').push({
-                Product: item.Product || "Unknown",
-                Motor: item.Motor || "Unknown",
-                Panel: item.Panel || "None",
-                Wire: item.Wire || "0",
-                PB: item.PB || "None",
-                PC: item.PC || "None"
-            });
-            count++;
-        });
-
-        alert("Successfully imported " + count + " items to the database!");
-        document.getElementById('jsonBox').value = ""; // Clear box
-    } catch (e) {
-        alert("Error: Please ensure your JSON is formatted correctly with [ ] brackets.");
-        console.error("JSON Parse Error:", e);
+function resetForm(fullClear) {
+    const textFields = ['soNumber', 'width', 'height', 'mainQty', 'manualComp', 'manualSpec'];
+    textFields.forEach(id => {
+        const field = document.getElementById(id);
+        if(id === 'mainQty') field.value = "1";
+        else if(id === 'manualComp' || id === 'manualSpec') field.value = "";
+        else field.value = "0";
+    });
+    const selects = ["LB3", "LB4", "LB5", "LB6", "LB7", "pcPair", "radarPair", "flashLamp", "safetyEdge"];
+    selects.forEach(id => document.getElementById(id).selectedIndex = 0);
+    const checks = ['chkSmps', 'chkRelay', 'chkIntegration', 'chkLimit', 'chkTrafic', 'chkKey', 'chkSmoke', 'chkHeat'];
+    checks.forEach(id => document.getElementById(id).checked = false);
+    if(fullClear) {
+        document.getElementById('clientName').value = "";
+        document.getElementById('oaNumber').value = "";
+        document.getElementById('masterBody').innerHTML = "";
+        document.getElementById('clientSummary').style.display = "none";
+        document.getElementById('clientSummary1').style.display = "none";
     }
 }
 
-// 3. Real-time Table Listener (Fixed to read the Correct Keys)
-db.ref('master_list').on('value', snap => {
-    masterData = []; 
-    let html = ""; 
-    let prods = new Set();
+function addToMasterList() {
+    const c = document.getElementById('clientName').value;
+    const oa = document.getElementById('oaNumber').value;
+    const so = document.getElementById('soNumber').value;
+    const w = parseFloat(document.getElementById('width').value);
+    const h = parseFloat(document.getElementById('height').value);
+    const q = parseInt(document.getElementById('mainQty').value);
+
+    if(!c || !oa || !so || w <= 0 || h <= 0) { alert("Check mandatory fields."); return; }
     
-    snap.forEach(child => {
-        const d = child.val(); 
-        d.id = child.key; // Store the Firebase ID for editing/deleting
-        masterData.push(d);
+    //Warning Message 
+    if (h > 4.0) {
+        let confirmWire = confirm("⚠️ ATTENTION: Door height is more than 4.0 meters.\n\nStandard wire lengths may not be sufficient. Have you checked the wire length for the Control Panel?");
+        if (!confirmWire) return; // Stop if user clicks 'Cancel'
+    }
+
+    lastClient = c.replace(/\s+/g, '_');
+    lastOA = oa;
+
+    const body = document.getElementById('masterBody');
+    const itemId = "item-" + itemCounter++;
+    document.getElementById('clientSummary').style.display = "block";
+    document.getElementById('clientSummary').innerHTML = `<b>Avians Electrical BOM - Client:</b> ${c} | <b>OA:</b> ${oa}`;
+    
+    let html = `<tr class="${itemId} product-sep"><td colspan="4">SO: ${so} | ${document.getElementById('LB1').value} (${w}x${h}m)</td><td><button class="del-btn" onclick="removeRow('${itemId}')">REMOVE</button></td></tr>`;
+    const addRow = (p, t, u, tot) => { if(t !== "None" && t) html += `<tr class="${itemId}"><td>${p}</td><td>${t}</td><td>${u}</td><td>${tot}</td><td></td></tr>`; };
+    // Helper to add a blank row
+    const addSpacer = () => { html += `<tr class="${itemId} spacer-row"><td colspan="5" style="height:10px; background:#f9f9f9;"></td></tr>`; };
+
+    addRow("Motor", document.getElementById('LB2').value, "1 Nos", q + " Nos");
+    addRow("Control Panel", document.getElementById('LB3').value, "1 Nos", q + " Nos");
+    
+    addSpacer(); // Blank row after Panel
+    
+    const pb = document.getElementById('LB5').value;
+    if(pb !== "None") {
+        addRow("Extra Push Button", pb, "1 Nos", q + " Nos");
+        addRow("PB Wire", "4c x 0.5 sqmm", "2 m", (q*2) + " m");
+        addSpacer(); // Blank row after Photocell
+    }
+
+    const pcType = document.getElementById('LB6').value;
+    const pcP = parseInt(document.getElementById('pcPair').value);
+    if(pcType !== "None" && pcP > 0) {
+        addRow("Photocell", pcType, pcP + " Pair", (pcP*q) + " Pair");
+        if(pcType === "Reflector") {
+            addRow("PC Wire", "4c x 0.5 sqmm", "2 m", (pcP*q*2) + " m");
+            addRow("Mounting", "Bracket for Reflector Photocell", "1 Nos", (pcP*q) + " Nos");
+        } else {
+            addRow("PC Wire (TX)", "2c x 0.5 sqmm", (3 + w).toFixed(1) + " m", (pcP*q*(3+w)).toFixed(1) + " m");
+            addRow("PC Wire (RX)", "4c x 0.5 sqmm", "2 m", (pcP*q*2) + " m");
+            addRow("Mounting", "Bracket for IR (TX/RX)", "1 Pair", (pcP*q) + " Pair");
+        }
+        addRow("Hardware for photocell", "Screw M4 x 20", "4 Nos", (pcP*q*4) + " Nos");
+        addRow("Hardware for photocell", "Taping Screw", "8 Nos", (pcP*q*8) + " Nos");
+        addSpacer(); // Blank row after Photocell
+    }
+
+    const rType = document.getElementById('LB7').value;
+    const rP = parseInt(document.getElementById('radarPair').value);
+    if(rType !== "None" && rP > 0) {
+        const rWireLen = (h + (w/2) + 3).toFixed(1);
+        addRow("Radar", rType, rP + " Pair", (rP*q) + " Pair");
+        addRow("Radar Wire", "4c x 0.5 sqmm", rWireLen + " m", (rP*q*rWireLen).toFixed(1) + " m");
+        addRow("Radar Mounting", "Standard Radar Bracket", rP + " Pair", (rP*q) + " Pair");
+        addRow("Hardware for radar", "Screw 35/8", "4 Nos", (pcP*q*4) + " Nos");
+        addRow("Hardware for radar", "Raul Plug", "4 Nos", (pcP*q*4) + " Nos");
+        addRow("Hardware for Radar", "Taping Screw", "8 Nos", (pcP*q*8) + " Nos");
+        addSpacer(); // Blank row after radar
+    }
+
+    const sEdge = document.getElementById('safetyEdge').value;
+    if(sEdge !== "None") {
+        addRow("Safety Edge", sEdge, "1 Nos", q + " Nos");
+        addRow("Safety Edge Wire", "4c x 0.5 sqmm", "0.5 m", (q*0.5).toFixed(1) + " m");
+        addSpacer(); // Blank row after safety Edge
+    }
+
+    const lamp = document.getElementById('flashLamp').value;
+    if(lamp !== "None") 
+    { 
+        addRow("Signal", "Flashing Lamp " + lamp, "1 Nos", q + " Nos");
+        addRow("Hardware for Flashing Lamp", "Screw 35/8", "2 Nos", (pcP*q*4) + " Nos");
+        addRow("Hardware for Flashing Lamp", "Raul Plug", "2 Nos", (pcP*q*4) + " Nos");
+        addRow("Hardware for Flashing Lamp", "Taping Screw", "2 Nos", (pcP*q*8) + " Nos");
+        addSpacer(); // Blank row after flashing Lamp
+    }
+
+
+    if(document.getElementById('chkSmps').checked) addRow("Power", "SMPS 24VDC", "1 Nos", q + " Nos");
+    if(document.getElementById('chkRelay').checked) addRow("Control", "24VDC Relay with Base", "1 Nos", q + " Nos");
+    if(document.getElementById('chkIntegration').checked) addRow("Service", "System Integration", "1 Job", q + " Job");
+    if(document.getElementById('chkLimit').checked) addRow("Hardware", "Limit Switch", "1 Nos", q + " Nos");
+    if(document.getElementById('chkTrafic').checked) addRow("Signal", "Traffic Light", "1 Nos", q + " Nos");
+    if(document.getElementById('chkKey').checked) addRow("Control", "Key Switch", "1 Nos", q + " Nos");
+    addSpacer(); // Blank row after assecesieries
+    //const mComp = document.getElementById('manualComp').value;
+    //if(mComp) addRow("Manual Entry", mComp + " (" + document.getElementById('manualSpec').value + ")", "1 Nos", q + " Nos");
+    // Update the Manual Entry section inside addToMasterList function
+        const mComp = document.getElementById('manualComp').value;
+        const mQtyPerDoor = parseInt(document.getElementById('manualQty').value) || 0;
+
+        if(mComp && mQtyPerDoor > 0) { 
+            addRow("Manual Entry", "","","");
+            addRow(
+                mComp, 
+                document.getElementById('manualSpec').value, 
+                mQtyPerDoor + " Nos", 
+                (q * mQtyPerDoor) + " Nos"
+            ); 
+        }
+
+    body.innerHTML += html;
+    resetForm(false);
+}
+
+function removeRow(id) {
+    const rows = document.getElementsByClassName(id);
+    while(rows.length > 0) rows[0].parentNode.removeChild(rows[0]);
+}
+
+// function exportToExcel() {
+//     let table = document.getElementById('masterTable').cloneNode(true);
+//     let rows = table.querySelectorAll('tr');
+    
+//     // Remove the "Action" column for a clean export
+//     rows.forEach(row => { if(row.lastElementChild) row.removeChild(row.lastElementChild); });
+
+//     const headerStyle = 'style="background-color: #000000; color: #f1c40f; font-weight: bold; border: 1px solid #333333;"';
+//     const cellStyle = 'style="border: 1px solid #cccccc;"';
+//     const infoStyle = 'style="background-color: #eeeeee; font-weight: bold; border: 1px solid #cccccc;"';
+//     const subHeaderStyle = 'style="background-color: #f1c40f; color: #000000; font-weight: bold; border: 1px solid #333333;"';
+
+//     const client = document.getElementById('clientName').value;
+//     const oa = document.getElementById('oaNumber').value;
+//     const qty = document.getElementById('mainQty').value;
+
+//     let html = `<html><head><meta charset="UTF-8"></head><body><table>`;
+    
+//     // Line 1: Client Details and OA No
+//     html += `<tr><td colspan="4" ${infoStyle}>CLIENT: ${client} | OA NO: ${oa}</td></tr>`;
+    
+//     rows.forEach((row) => {
+//         let isHeader = row.parentElement.tagName === 'THEAD';
+//         let isSubHeader = row.classList.contains('product-sep');
         
-        if(d.Product) prods.add(d.Product);
+//         if (isSubHeader) {
+//             // Line 2: Detailed Product Info | Qty
+//             html += `<tr><td colspan="4" ${infoStyle}>${row.cells[0].innerText} | TOTAL QTY: ${qty}</td></tr>`;
+//         }
+        
+//         html += `<tr>`;
+//         Array.from(row.cells).forEach(cell => {
+//             let style = isHeader ? headerStyle : (isSubHeader ? subHeaderStyle : cellStyle);
+//             html += `<td ${style}>${cell.innerText}</td>`;
+//         });
+//         html += `</tr>`;
+//     });
 
-        // Populate the table rows
-        html += `<tr>
-            <td>${d.Product || ''}</td>
-            <td>${d.Motor || ''}</td>
-            <td>${d.Panel || ''}</td>
-            <td>${d.Wire || ''}</td>
-            <td>${d.PB || ''}</td>
-            <td>${d.PC || ''}</td>
-            <td>
-                <button class="btn-blue" onclick="editItem('${d.id}')">Edit</button> 
-                <button class="btn-red" onclick="if(confirm('Delete?')) db.ref('master_list/${d.id}').remove()">X</button>
-            </td>
-        </tr>`;
-    });
-    
-    document.getElementById('master-body').innerHTML = html;
-    
-    // Update BOM Dropdowns
-    let opt = "<option>Select Product</option>"; 
-    prods.forEach(p => opt += `<option value="${p}">${p}</option>`);
-    document.getElementById('sP').innerHTML = opt;
-});
+//     html += `</table></body></html>`;
 
-function editItem(key) {
-    const item = masterData.find(x => x.id === key);
-    document.getElementById('edit-id').value = key;
-    document.getElementById('mP').value = item.Product;
-    document.getElementById('mM').value = item.Motor;
-    document.getElementById('mPan').value = item.Panel;
-    document.getElementById('mW').value = item.Wire;
-    document.getElementById('mPB').value = item.PB;
-    document.getElementById('mPC').value = item.PC;
-    document.getElementById('save-btn').innerText = "Update Item";
-    document.getElementById('save-btn').className = "btn btn-blue";
-    document.getElementById('cancel-btn').classList.remove('hidden');
-    window.scrollTo(0,0);
-}
-
-function resetForm() {
-    document.getElementById('edit-id').value = "";
-    ['mP','mM','mPan','mW','mPB','mPC'].forEach(i => document.getElementById(i).value = "");
-    document.getElementById('save-btn').innerText = "Save Item";
-    document.getElementById('save-btn').className = "btn btn-green";
-    document.getElementById('cancel-btn').classList.add('hidden');
-}
-
-// // JSON Logic
-// function importJSON() {
-//     try {
-//         const list = JSON.parse(document.getElementById('jsonBox').value);
-//         list.forEach(i => db.ref('master_list').push(i));
-//         alert("Bulk Import Successful!");
-//         document.getElementById('jsonBox').value = "";
-//     } catch(e) { alert("Invalid JSON"); }
+//     const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+//     const a = document.createElement('a');
+//     a.href = window.URL.createObjectURL(blob);
+//     a.download = `${lastClient}_${oa}.xls`; 
+//     a.click();
 // }
+function exportToExcel() {
+    let table = document.getElementById('masterTable').cloneNode(true);
+    let rows = table.querySelectorAll('tr');
+    
+    rows.forEach(row => { if(row.lastElementChild) row.removeChild(row.lastElementChild); });
 
-// Syncing Table & Dropdowns
-db.ref('master_list').on('value', snap => {
-    masterData = []; let h = ""; let prods = new Set();
-    snap.forEach(c => {
-        const d = c.val(); d.id = c.key; masterData.push(d); prods.add(d.Product);
-        h += `<tr><td>${d.Product}</td><td>${d.Motor}</td><td>${d.Panel}</td><td>${d.Wire}</td><td>${d.PB}</td><td>${d.PC}</td>
-              <td><button class="btn-blue" onclick="editItem('${d.id}')">Edit</button> <button class="btn-red" onclick="db.ref('master_list/${d.id}').remove()">X</button></td></tr>`;
+    const headerStyle = 'style="background-color: #000000; color: #f1c40f; font-weight: bold; border: 1px solid #333333;"';
+    const infoStyle = 'style="background-color: #eeeeee; font-weight: bold; border: 1px solid #cccccc;"';
+    const subHeaderStyle = 'style="background-color: #f1c40f; color: #000000; font-weight: bold; border: 1px solid #333333;"';
+    
+    // Standard cell border + Vertical line logic
+    const baseCellStyle = 'border: 1px solid #cccccc;';
+    const verticalLineStyle = 'border-right: 3px solid #2c3e50;'; // The "Line after Panel"
+
+    const client = document.getElementById('clientName').value;
+    const oa = document.getElementById('oaNumber').value;
+    const qty = document.getElementById('mainQty').value;
+
+    let html = `<html><head><meta charset="UTF-8"></head><body><table>`;
+    
+    html += `<tr><td colspan="4" ${infoStyle}>CLIENT: ${client} | OA NO: ${oa}</td></tr>`;
+    
+    rows.forEach((row) => {
+        let isHeader = row.parentElement.tagName === 'THEAD';
+        let isSubHeader = row.classList.contains('product-sep');
+        
+        if (isSubHeader) {
+            html += `<tr><td colspan="4" ${infoStyle}>${row.cells[0].innerText} | TOTAL QTY: ${qty}</td></tr>`;
+        }
+        
+        html += `<tr>`;
+        Array.from(row.cells).forEach((cell, index) => {
+            let style = "";
+            if (isHeader) style = headerStyle;
+            else if (isSubHeader) style = subHeaderStyle;
+            else {
+                // Apply vertical line after the 2nd column (Specification) 
+                // ONLY for the Motor and Panel rows to create that visual break
+                let finalBorder = (index === 1) ? baseCellStyle + verticalLineStyle : baseCellStyle;
+                style = `style="${finalBorder}"`;
+            }
+            html += `<td ${style}>${cell.innerText}</td>`;
+        });
+        html += `</tr>`;
     });
-    document.getElementById('master-body').innerHTML = h;
-    let opt = "<option>Select</option>"; prods.forEach(p => opt += `<option value="${p}">${p}</option>`);
-    document.getElementById('sP').innerHTML = opt;
-});
 
-function toggleTable() {
-    const w = document.getElementById('table-wrap');
-    const b = document.getElementById('tBtn');
-    w.classList.toggle('hidden');
-    b.innerText = w.classList.contains('hidden') ? "Show Saved Data" : "Hide Saved Data";
-}
+    html += `</table></body></html>`;
 
-// BOM Logic
-function syncM() {
-    const p = document.getElementById('sP').value;
-    let h = "<option>Select Motor</option>";
-    masterData.filter(d => d.Product === p).forEach(d => h += `<option value="${d.Motor}">${d.Motor}</option>`);
-    document.getElementById('sM').innerHTML = h;
+    const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+    const a = document.createElement('a');
+    a.href = window.URL.createObjectURL(blob);
+    a.download = `${lastClient}_${oa}.xls`; 
+    a.click();
 }
-function addBOM() {
-    const mName = document.getElementById('sM').value;
-    const match = masterData.find(x => x.Motor === mName);
-    const q = parseInt(document.getElementById('qty').value) || 1;
-    if(match) {
-        const push = (c, s, u) => currentBOM.push({c, s, u, t: u*q});
-        push("Motor", match.Motor, 1);
-        push("Panel", match.Panel, 1);
-        if(match.Wire !== "0") push("Cable", match.Wire, 15);
-        push("Push Button", match.PB, 1);
-        push("Sensor", match.PC, 1);
-        renderBOM();
-    }
-}
-function renderBOM() {
-    let h = ""; currentBOM.forEach((i, x) => h += `<tr><td>${i.c}</td><td>${i.s}</td><td>${i.u}</td><td>${i.t}</td><td><button onclick="currentBOM.splice(${x},1);renderBOM()">X</button></td></tr>`);
-    document.getElementById('bom-body').innerHTML = h;
-}
-
-function init() { document.getElementById('login-page').classList.add('hidden'); document.getElementById('app-content').classList.remove('hidden'); }
-if(sessionStorage.getItem('auth')) init();
+window.onload = init;
 </script>
 </body>
 </html>
